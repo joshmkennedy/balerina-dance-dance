@@ -8,6 +8,7 @@
     "build": "build index.html"
   },
   "dependencies": {
+    "game": "^1.0.3",
     "parcel-bundler": "^1.12.4"
   },
   "devDependencies": {

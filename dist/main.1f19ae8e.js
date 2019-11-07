@@ -189,212 +189,213 @@ var reloadCSS = require('_css_loader');
 
 module.hot.dispose(reloadCSS);
 module.hot.accept(reloadCSS);
-},{"./images/ballerinaSprites_right.png":[["ballerinaSprites_right.ee890085.png","images/ballerinaSprites_right.png"],"images/ballerinaSprites_right.png"],"./images/ballerinaSprites_left.png":[["ballerinaSprites_left.58c06726.png","images/ballerinaSprites_left.png"],"images/ballerinaSprites_left.png"],"_css_loader":"node_modules/parcel-bundler/src/builtins/css-loader.js"}],"game.js":[function(require,module,exports) {
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+},{"_css_loader":"node_modules/parcel-bundler/src/builtins/css-loader.js"}],"GameArea.js":[function(require,module,exports) {
+"use strict";
 
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.GameArea = void 0;
 
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+var _game = require("./game");
 
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-/*document.addEventListener("keydown", function(event) {
-  console.log(event.which);
-})*/
-var player = document.querySelector(".player");
-
-var allObstacles = _toConsumableArray(document.querySelectorAll(".obstacle"));
-
-var leftIsDown = false,
-    rightIsDown = false;
-var shouldFall = false,
-    shouldJump = true;
-var speed = 3;
-var crash = false;
-var stageWidth = innerWidth;
-
-var didCrashAgainstWall = function didCrashAgainstWall(dir) {
-  var _player$getBoundingCl = player.getBoundingClientRect(),
-      x = _player$getBoundingCl.x,
-      width = _player$getBoundingCl.width,
-      bottom = _player$getBoundingCl.bottom,
-      height = _player$getBoundingCl.height,
-      y = _player$getBoundingCl.y;
-
-  var pbot = bottom,
-      ph = height;
-  crash = false;
-
-  if (dir === "left" && x < 0) {
-    console.log("CRASSSHED");
-    console.log(x, stageWidth);
-    crash = true;
+console.log(_typeof(_game.loop));
+var GameArea = {
+  canvas: document.querySelector("#canvas"),
+  start: function start() {
+    this.shouldStop = false;
+    this.canvas.width = 400;
+    this.canvas.height = 400;
+    this.context = this.canvas.getContext("2d");
+    this.frameNo = 0;
+    this.lastTime = new Date().getTime;
+    this.currentTime = 0;
+    this.startLoop = requestAnimationFrame(_game.loop);
+    window.addEventListener("keydown", function (e) {
+      GameArea.keys = GameArea.keys || [];
+      GameArea.keys[e.keyCode] = true;
+    });
+    window.addEventListener("keyup", function (e) {
+      _game.player.isWalkRight = false;
+      _game.player.isWalkLeft = false;
+      GameArea.keys[e.keyCode] = false;
+    });
+  },
+  clear: function clear() {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  },
+  stop: function stop() {
+    this.shouldStop = true;
   }
-
-  if (dir === "right" && x >= stageWidth - width) {
-    console.log("CRASSSHED");
-    console.log(x, stageWidth);
-    crash = true;
-  }
-
-  return crash;
 };
+exports.GameArea = GameArea;
+},{"./game":"game.js"}],"images/ballerinaSprites_right.png":[function(require,module,exports) {
+module.exports = "/ballerinaSprites_right.ee890085.png";
+},{}],"images/ballerinaSprites_left.png":[function(require,module,exports) {
+module.exports = "/ballerinaSprites_left.58c06726.png";
+},{}],"component.js":[function(require,module,exports) {
+"use strict";
 
-function scorePositon() {
-  var playerBounds = player.getBoundingClientRect();
-  allObstacles.map(function (obs) {
-    var bounds = obs.getBoundingClientRect();
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = component;
 
-    if (playerBounds.right == bounds.left || playerBounds.right <= bounds.left + bounds.width || playerBounds.right + playerBounds.width <= bounds.left + bounds.width || playerBounds.left == bounds.right || playerBounds.left <= bounds.right - 20) {
-      ScorePoints();
+var _GameArea = require("./GameArea");
+
+var _ballerinaSprites_right = _interopRequireDefault(require("./images/ballerinaSprites_right.png"));
+
+var _ballerinaSprites_left = _interopRequireDefault(require("./images/ballerinaSprites_left.png"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var img = new Image();
+img.src = _ballerinaSprites_right.default;
+var img2 = new Image();
+img2.src = _ballerinaSprites_left.default;
+
+function component(width, height, color, x, y, ticksPerFrame, numberOfFrames) {
+  this.width = width;
+  this.height = height;
+  this.x = x;
+  this.y = y;
+  this.speedX = 0;
+  this.speedY = 0;
+  this.frameIndex = 0;
+  this.tickCount = 0;
+  this.ticksPerFrame = ticksPerFrame || 0;
+  this.numberOfFrames = numberOfFrames || 1;
+  this.isWalkRight = false;
+
+  this.update = function () {
+    var ctx = _GameArea.GameArea.context;
+
+    if (this.isWalkRight) {
+      this.walkRight();
+    } else if (this.isWalkLeft) {
+      this.walkLeft();
+    } else {
+      this.standStill();
     }
-  });
-} ////GO RIGHT
+  };
 
+  this.newPos = function (delta) {
+    this.x = this.speedX;
+    this.y = this.speedY;
+  };
 
-window.addEventListener("keydown", goRight);
-window.addEventListener("keyup", stopGoRight); ///GO LEFT
+  this.walkRight = function () {
+    var ctx = _GameArea.GameArea.context;
+    this.tickCount += 1;
 
-window.addEventListener("keydown", goLeft);
-window.addEventListener("keyup", stopGoLeft); ////JUMP
+    if (this.tickCount > this.ticksPerFrame) {
+      this.tickCount = 0;
 
-window.addEventListener("keydown", jump);
-window.addEventListener("keydown", scorePositon); //GO RIGHT FN
-
-function goRight(e) {
-  if (e.code === "ArrowRight") {
-    var _currentPos = parseInt(window.getComputedStyle(player).left);
-
-    player.classList.add("walking_right");
-
-    if (!rightIsDown) {
-      rightIsDown = true;
-      var req;
-
-      var moveRight = function moveRight() {
-        didCrashAgainstWall("right");
-
-        if (!crash) {
-          req = requestAnimationFrame(moveRight);
-          player.style.left = _currentPos + speed + "px";
-          _currentPos = _currentPos + speed;
-
-          if (!rightIsDown) {
-            cancelAnimationFrame(req);
-          }
-        } else {
-          cancelAnimationFrame(req);
-        }
-      };
-
-      requestAnimationFrame(moveRight);
-    }
-  }
-} //STOP GO RIGHT FN
-
-
-function stopGoRight(e) {
-  if (rightIsDown && e.code === "ArrowRight") {
-    player.classList.remove("walking_right");
-    rightIsDown = false;
-  }
-} ///GO LEFT FN
-
-
-function goLeft(e) {
-  if (e.code === "ArrowLeft") {
-    player.classList.add("walking_left");
-
-    var _currentPos2 = parseInt(window.getComputedStyle(player).left);
-
-    if (!leftIsDown) {
-      leftIsDown = true;
-      var req;
-
-      var moveLeft = function moveLeft() {
-        didCrashAgainstWall("left");
-
-        if (!crash) {
-          req = requestAnimationFrame(moveLeft);
-          player.style.left = _currentPos2 - speed + "px";
-          _currentPos2 = _currentPos2 - speed;
-
-          if (!leftIsDown) {
-            cancelAnimationFrame(req);
-          }
-        }
-      };
-
-      requestAnimationFrame(moveLeft);
-    }
-  }
-} //STOP GO LEFT FN
-
-
-function stopGoLeft(e) {
-  if (leftIsDown && e.code === "ArrowLeft") {
-    player.classList.remove("walking_left");
-    leftIsDown = false;
-  }
-} ///JUMP FN
-
-
-var currentPos = parseInt(window.getComputedStyle(player).top);
-var startingPos = currentPos;
-
-function jump(e) {
-  var startJump;
-
-  if (e.code === "ArrowUp" || e.keyCode === 32) {
-    if (shouldJump) {
-      shouldJump = false;
-      var req;
-      dontActivate = true;
-      player.classList.add("jumping");
-
-      if (!shouldFall) {
-        startJump = setInterval(function () {
-          if (shouldFall) {
-            clearInterval(startJump);
-          }
-
-          var performJump = function performJump() {
-            req = requestAnimationFrame(performJump);
-            player.style.top = currentPos - 10 + "px";
-            currentPos = currentPos - 10;
-
-            if (currentPos <= startingPos) {
-              cancelAnimationFrame(req);
-            }
-          };
-
-          requestAnimationFrame(performJump);
-
-          if (currentPos <= startingPos - 100) {
-            shouldFall = true;
-
-            var performFall = function performFall() {
-              req = requestAnimationFrame(performFall);
-              player.style.top = currentPos + 2 + "px";
-              currentPos = currentPos + 2;
-
-              if (currentPos >= startingPos) {
-                cancelAnimationFrame(req);
-                player.style.top = startingPos;
-                shouldFall = false;
-                shouldJump = true;
-                player.classList.remove("jumping");
-              }
-            };
-
-            requestAnimationFrame(performFall);
-          }
-        }, 20);
+      if (this.frameIndex < this.numberOfFrames - 1) {
+        this.frameIndex += 1;
+      } else {
+        this.frameIndex = 0;
       }
     }
+
+    ctx.drawImage(img, this.frameIndex * (this.width + 1), 0, this.width, this.height, this.x, this.y, this.width, this.height);
+  };
+
+  this.walkLeft = function () {
+    var ctx = _GameArea.GameArea.context;
+    this.tickCount += 1;
+
+    if (this.tickCount > this.ticksPerFrame) {
+      this.tickCount = 0;
+
+      if (this.frameIndex < this.numberOfFrames - 1) {
+        this.frameIndex += 1;
+      } else {
+        this.frameIndex = 0;
+      }
+    }
+
+    ctx.drawImage(img2, 969 - this.frameIndex * this.width, 0, this.width, this.height, this.x, this.y, this.width, this.height);
+  };
+
+  this.standStill = function () {
+    var ctx = _GameArea.GameArea.context;
+    ctx.drawImage(img, 4, this.height * 2.1, this.width, this.height, this.x, this.y, this.width, this.height);
+  };
+}
+},{"./GameArea":"GameArea.js","./images/ballerinaSprites_right.png":"images/ballerinaSprites_right.png","./images/ballerinaSprites_left.png":"images/ballerinaSprites_left.png"}],"game.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.loop = loop;
+exports.player = void 0;
+
+var _component = _interopRequireDefault(require("./component"));
+
+var _GameArea = require("./GameArea");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// starts the game
+//
+function startGame() {
+  _GameArea.GameArea.start();
+} // creation of our ballerina
+
+
+var player = new _component.default(53, 73, "red", 0, 0, 4, 8); // Causes all Changes in the Game
+// put all events in between clear and update
+
+exports.player = player;
+
+function gameLoop(delta) {
+  _GameArea.GameArea.clear();
+
+  if (_GameArea.GameArea.keys && _GameArea.GameArea.keys[37]) {
+    player.isWalkLeft = true;
+    player.speedX += -2;
+  }
+
+  if (_GameArea.GameArea.keys && _GameArea.GameArea.keys[39]) {
+    player.isWalkRight = true;
+    player.speedX += 2;
+  }
+
+  if (_GameArea.GameArea.keys && _GameArea.GameArea.keys[38]) {
+    player.speedY += -2;
+  }
+
+  if (_GameArea.GameArea.keys && _GameArea.GameArea.keys[40]) {
+    player.speedY += 2;
+  }
+
+  player.newPos(delta);
+  player.update();
+}
+/* 
+ this is Called by GameArea to update the game
+ it calls the game loop function which causes the Changes in the canvas
+*/
+
+
+function loop() {
+  var req = requestAnimationFrame(loop);
+  _GameArea.GameArea.currentTime = new Date().getTime();
+  var delta = (_GameArea.GameArea.currentTime - _GameArea.GameArea.lastTime) / 1000;
+  gameLoop(delta);
+  _GameArea.GameArea.lastTime = _GameArea.GameArea.currentTime;
+
+  if (_GameArea.GameArea.shouldStop) {
+    cancelAnimationFrame(req);
   }
 }
-},{}],"main.js":[function(require,module,exports) {
+
+startGame();
+},{"./component":"component.js","./GameArea":"GameArea.js"}],"main.js":[function(require,module,exports) {
 "use strict";
 
 require("./main.scss");
@@ -428,7 +429,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59490" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65291" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
