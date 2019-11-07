@@ -6,6 +6,7 @@ img.src = image;
 const img2 = new Image();
 img2.src = image2;
 
+//
 export default function component(
   width,
   height,

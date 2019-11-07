@@ -2,7 +2,7 @@ import component from "./component";
 import { GameArea } from "./GameArea";
 
 // starts the game
-//
+
 function startGame() {
   GameArea.start();
 }

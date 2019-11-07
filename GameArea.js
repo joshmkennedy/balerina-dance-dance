@@ -29,3 +29,4 @@ export const GameArea = {
     this.shouldStop = true;
   },
 };
+//--//
