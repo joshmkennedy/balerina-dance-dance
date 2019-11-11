@@ -189,7 +189,9 @@ var reloadCSS = require('_css_loader');
 
 module.hot.dispose(reloadCSS);
 module.hot.accept(reloadCSS);
-},{"_css_loader":"node_modules/parcel-bundler/src/builtins/css-loader.js"}],"GameArea.js":[function(require,module,exports) {
+},{"./images/Stage.jpg":[["Stage.bee5bc65.jpg","images/Stage.jpg"],"images/Stage.jpg"],"_css_loader":"node_modules/parcel-bundler/src/builtins/css-loader.js"}],"images/testimg.png":[function(require,module,exports) {
+module.exports = "/testimg.ba02fcaf.png";
+},{}],"GameArea.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -199,19 +201,37 @@ exports.GameArea = void 0;
 
 var _game = require("./game");
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _testimg = _interopRequireDefault(require("./images/testimg.png"));
 
-console.log(_typeof(_game.loop));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var image = new Image();
+image.src = _testimg.default;
+var video = document.createElement("VIDEO");
+video.setAttribute("width", 800);
+video.setAttribute("height", 500);
+navigator.mediaDevices.getUserMedia({
+  video: true
+}).then(function (media) {
+  video.srcObject = media;
+  video.play();
+}); //document.body.appendChild(video);
+
 var GameArea = {
   canvas: document.querySelector("#canvas"),
+  width: 800,
+  height: 500,
   start: function start() {
     this.shouldStop = false;
-    this.canvas.width = 400;
-    this.canvas.height = 400;
+    this.canvas.width = this.width;
+    this.canvas.height = this.height;
+    this.floor = 300;
     this.context = this.canvas.getContext("2d");
-    this.frameNo = 0;
+    this.frameNo = 0; //
+
     this.lastTime = new Date().getTime;
     this.currentTime = 0;
+    this.score = 0;
     this.startLoop = requestAnimationFrame(_game.loop);
     window.addEventListener("keydown", function (e) {
       GameArea.keys = GameArea.keys || [];
@@ -220,6 +240,7 @@ var GameArea = {
     window.addEventListener("keyup", function (e) {
       _game.player.isWalkRight = false;
       _game.player.isWalkLeft = false;
+      _game.player.isDancing = false;
       GameArea.keys[e.keyCode] = false;
     });
   },
@@ -228,10 +249,96 @@ var GameArea = {
   },
   stop: function stop() {
     this.shouldStop = true;
+  },
+  updateScore: function updateScore() {
+    this.score += 1;
+    console.log(this.score);
+
+    if (this.score === 2) {
+      this.stop();
+      this.win();
+    }
+  },
+  win: function win() {
+    var _this = this;
+
+    _game.player.isDancing = false;
+    this.score = 0;
+    this.countDown = 4;
+    this.timer = setInterval(function () {
+      if (_this.countDown < 1) {
+        clearInterval(_this.timer);
+
+        _this.takePicture();
+
+        return;
+      }
+
+      _this.context.fillStyle = "hotpink";
+
+      _this.context.fillRect(0, 0, _this.width, _this.height);
+
+      _this.context.fillStyle = "white";
+      _this.context.font = " 30px arial";
+      _this.context.textAlign = "center";
+
+      if (_this.countDown >= 2) {
+        _this.context.fillText("Wait and see who is the best balerina", _this.width / 2, 30);
+      } else {
+        _this.context.fillText("SMILE", _this.width / 2, 30);
+      }
+
+      _this.context.font = "70px cursive";
+
+      _this.context.fillText("".concat(_this.countDown), _this.width / 2, _this.height / 2);
+
+      _this.countDown -= 1;
+    }, 1000); //this.takePicture();
+  },
+  menu: function menu() {
+    var _this2 = this;
+
+    var ctx = this.canvas.getContext("2d");
+    this.canvas.width = this.width;
+    this.canvas.height = this.height;
+    ctx.fillStyle = "rgba(0,0,0,.6)";
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.fillStyle = "white";
+    ctx.font = "50px cursive";
+    ctx.textAlign = "center";
+    ctx.fillText("Play Game", this.width / 2, this.height / 3);
+    ctx.font = "35px helvetica";
+    ctx.fillText("Spin in the spotlight to be the best Balerina", this.width / 2, this.height / 2);
+    ctx.font = "18px helvetica";
+    ctx.fillText("move the balerina with arrow keys", this.width / 2, this.height / 2 + 45);
+    ctx.fillText("press space bar to spin her", this.width / 2, this.height / 2 + 75);
+    ctx.font = "25px arial";
+    ctx.fillText("click anywhere to start", this.width / 2, this.height - 80);
+    window.addEventListener("click", function () {
+      return _this2.startGame();
+    });
+  },
+  startGame: function startGame() {
+    console.log("donuts");
+    window.removeEventListener("click", GameArea.startGame);
+    GameArea.start();
+
+    _game.player.restart();
+  },
+  takePicture: function takePicture() {
+    this.context.textAlign = "center";
+    this.context.drawImage(video, 0, 0, 800, 675);
+    this.context.fillStyle = "white";
+    this.context.font = "50px cursive";
+    this.context.fillText("Its You!", this.width / 2, this.height - 100);
+    this.context.font = "25px helvetica";
+    this.context.fillText("Click anywhere to restart", this.width / 2, this.height - 50);
+    window.addEventListener("click", this.startGame);
   }
-};
+}; //--//
+
 exports.GameArea = GameArea;
-},{"./game":"game.js"}],"images/ballerinaSprites_right.png":[function(require,module,exports) {
+},{"./game":"game.js","./images/testimg.png":"images/testimg.png"}],"images/ballerinaSprites_right.png":[function(require,module,exports) {
 module.exports = "/ballerinaSprites_right.ee890085.png";
 },{}],"images/ballerinaSprites_left.png":[function(require,module,exports) {
 module.exports = "/ballerinaSprites_left.58c06726.png";
@@ -241,9 +348,11 @@ module.exports = "/ballerinaSprites_left.58c06726.png";
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = component;
+exports.default = playerComponent;
 
 var _GameArea = require("./GameArea");
+
+var _game = _interopRequireDefault(require("./game"));
 
 var _ballerinaSprites_right = _interopRequireDefault(require("./images/ballerinaSprites_right.png"));
 
@@ -256,7 +365,8 @@ img.src = _ballerinaSprites_right.default;
 var img2 = new Image();
 img2.src = _ballerinaSprites_left.default;
 
-function component(width, height, color, x, y, ticksPerFrame, numberOfFrames) {
+/////////     //     //
+function playerComponent(width, height, color, x, y, ticksPerFrame, numberOfFrames) {
   this.width = width;
   this.height = height;
   this.x = x;
@@ -268,22 +378,42 @@ function component(width, height, color, x, y, ticksPerFrame, numberOfFrames) {
   this.ticksPerFrame = ticksPerFrame || 0;
   this.numberOfFrames = numberOfFrames || 1;
   this.isWalkRight = false;
+  this.isJumping = true;
+  this.jumpPos = 0;
+  this.isDancing = false;
+  this.danceTime = 100;
 
   this.update = function () {
-    var ctx = _GameArea.GameArea.context;
+    var ctx = _GameArea.GameArea.context; //this adds the animations and draws the images based on if the key is pressed
 
     if (this.isWalkRight) {
       this.walkRight();
     } else if (this.isWalkLeft) {
       this.walkLeft();
+    } else if (this.isJumping) {
+      this.jump();
+    } else if (this.isDancing) {
+      this.dance();
     } else {
       this.standStill();
     }
   };
 
   this.newPos = function (delta) {
-    this.x = this.speedX;
-    this.y = this.speedY;
+    this.speedY += 0.7; // gravity
+
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.speedX *= 0.9; // friction
+
+    this.speedY *= 0.9; // friction
+    // if player is falling below floor line
+
+    if (this.y > _GameArea.GameArea.floor - this.height) {
+      this.isJumping = false;
+      this.y = _GameArea.GameArea.floor - this.height;
+      this.speedY = 0;
+    }
   };
 
   this.walkRight = function () {
@@ -293,14 +423,18 @@ function component(width, height, color, x, y, ticksPerFrame, numberOfFrames) {
     if (this.tickCount > this.ticksPerFrame) {
       this.tickCount = 0;
 
-      if (this.frameIndex < this.numberOfFrames - 1) {
+      if (this.frameIndex < this.numberOfFrames[this.isJumping ? 1 : 0] - 1) {
         this.frameIndex += 1;
       } else {
         this.frameIndex = 0;
       }
     }
 
-    ctx.drawImage(img, this.frameIndex * (this.width + 1), 0, this.width, this.height, this.x, this.y, this.width, this.height);
+    if (!this.isJumping) {
+      ctx.drawImage(img, this.frameIndex * (this.width + 1), 0, this.width, this.height, this.x, this.y, this.width, this.height);
+    } else {
+      ctx.drawImage(img, this.frameIndex * (this.width + 1), this.height, this.width, this.height, this.x, this.y, this.width, this.height);
+    }
   };
 
   this.walkLeft = function () {
@@ -310,22 +444,212 @@ function component(width, height, color, x, y, ticksPerFrame, numberOfFrames) {
     if (this.tickCount > this.ticksPerFrame) {
       this.tickCount = 0;
 
-      if (this.frameIndex < this.numberOfFrames - 1) {
+      if (this.frameIndex < this.numberOfFrames[this.isJumping ? 1 : 0] - 1) {
         this.frameIndex += 1;
       } else {
         this.frameIndex = 0;
       }
     }
 
-    ctx.drawImage(img2, 969 - this.frameIndex * this.width, 0, this.width, this.height, this.x, this.y, this.width, this.height);
+    if (!this.isJumping) {
+      ctx.drawImage(img2, 969 - this.frameIndex * this.width, 0, this.width, this.height, this.x, this.y, this.width, this.height);
+    } else {
+      ctx.drawImage(img, this.frameIndex * (this.width + 1), this.height, this.width, this.height, this.x, this.y, this.width, this.height);
+    }
   };
 
   this.standStill = function () {
     var ctx = _GameArea.GameArea.context;
-    ctx.drawImage(img, 4, this.height * 2.1, this.width, this.height, this.x, this.y, this.width, this.height);
+    ctx.drawImage(img, 4, this.height * 2.1, this.width, this.height, this.x, this.y, this.width - 5, this.height - 5);
+  };
+
+  this.jump = function () {
+    var ctx = _GameArea.GameArea.context;
+    this.tickCount += 1;
+
+    if (this.tickCount > this.ticksPerFrame) {
+      this.tickCount = 0;
+
+      if (this.frameIndex < this.numberOfFrames[1] - 1) {
+        this.frameIndex += 1;
+      } else {
+        this.frameIndex = 0;
+      }
+    }
+
+    ctx.drawImage(img, this.frameIndex * (this.width + 1), this.height, this.width, this.height, this.x, this.y, this.width, this.height);
+  };
+
+  this.dance = function () {
+    var ctx = _GameArea.GameArea.context;
+
+    if (this.danceTime >= 0) {
+      this.danceTime -= 1;
+    } else {
+      this.danceTime = 100;
+    }
+
+    this.tickCount += 1;
+
+    if (this.tickCount > this.ticksPerFrame) {
+      this.tickCount = 0;
+
+      if (this.frameIndex < this.numberOfFrames[1] - 1) {
+        this.frameIndex += 1;
+      } else {
+        this.frameIndex = 0;
+      }
+    }
+
+    ctx.drawImage(img, this.frameIndex * (this.width + 1), this.height, this.width, this.height, this.x, this.y, this.width, this.height);
+  };
+
+  this.restart = function () {
+    this.width = width;
+    this.height = height;
+    this.x = x;
+    this.y = y;
+    this.speedX = 0;
+    this.speedY = 0;
+    this.frameIndex = 0;
+    this.tickCount = 0;
+    this.ticksPerFrame = ticksPerFrame || 0;
+    this.numberOfFrames = numberOfFrames || 1;
+    this.isWalkRight = false;
+    this.isJumping = true;
+    this.jumpPos = 0;
+    this.isDancing = false;
+    this.danceTime = 100;
   };
 }
-},{"./GameArea":"GameArea.js","./images/ballerinaSprites_right.png":"images/ballerinaSprites_right.png","./images/ballerinaSprites_left.png":"images/ballerinaSprites_left.png"}],"game.js":[function(require,module,exports) {
+},{"./GameArea":"GameArea.js","./game":"game.js","./images/ballerinaSprites_right.png":"images/ballerinaSprites_right.png","./images/ballerinaSprites_left.png":"images/ballerinaSprites_left.png"}],"physics.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = physics;
+
+var _GameArea = require("./GameArea");
+
+function physics(speedX, speedY, x, y) {
+  speedY += 0.7; // gravity
+
+  x += speedX;
+  y += speedY;
+  speedX *= 0.9; // friction
+
+  speedY *= 0.9; // friction
+
+  return {
+    speedX: speedX,
+    speedY: speedY,
+    x: x,
+    y: y
+  };
+}
+},{"./GameArea":"GameArea.js"}],"images/spotlight.png":[function(require,module,exports) {
+module.exports = "/spotlight.beb6c793.png";
+},{}],"obstacle.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _GameArea = require("./GameArea");
+
+var _physics = _interopRequireDefault(require("./physics"));
+
+var _spotlight = _interopRequireDefault(require("./images/spotlight.png"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var spotLight = new Image();
+spotLight.src = _spotlight.default;
+
+var Obstacle =
+/*#__PURE__*/
+function () {
+  function Obstacle(width, height, color, x) {
+    _classCallCheck(this, Obstacle);
+
+    this.height = height;
+    this.width = width;
+    this.color = "rgba(0,0,0,.3)";
+    this.y = 350;
+    this.x = x;
+    this.speedX = 0;
+    this.speedY = 0;
+    this.crash = false;
+  }
+
+  _createClass(Obstacle, [{
+    key: "update",
+    value: function update() {
+      var ctx = _GameArea.GameArea.context;
+      ctx.fillStyle = this.color; // ctx.fillRect(this.x, this.y, this.width, this.height);
+
+      ctx.drawImage(spotLight, 0, -50, 500, 500, this.x, this.y, this.width, this.height);
+    }
+  }, {
+    key: "newPos",
+    value: function newPos(delta) {
+      this.speedY += 0.7; // gravity
+
+      if (this.newSpot <= this.x) {
+        this.speedX -= 4;
+      } else if (this.newSpot >= this.x) {
+        this.speedX += 4;
+      } else {
+        this.speedX = this.x;
+      }
+
+      this.x = this.speedX;
+      this.y += this.speedY; //this.speedX *= 0.9; // friction
+
+      this.speedY *= 0.9; // friction
+      // if player is falling below floor line
+
+      if (this.y > _GameArea.GameArea.floor - this.height / 1.5) {
+        this.y = _GameArea.GameArea.floor - this.height / 1.5;
+        this.speedY = 0;
+      }
+    }
+  }, {
+    key: "collision",
+    value: function collision(obj) {
+      var bottomOfMe = this.y + this.height,
+          topOfMe = this.y,
+          rightOfMe = this.x,
+          leftOfMe = this.x + this.width;
+      var bottomOfObj = obj.y + obj.height,
+          topOfObj = obj.y,
+          rightOfObj = obj.x,
+          leftOfObj = obj.x + obj.width;
+
+      if (leftOfMe > rightOfObj && rightOfMe < leftOfObj && topOfMe < bottomOfObj) {
+        this.crash = true;
+      } else {
+        this.crash = false;
+      }
+
+      return this.crash;
+    }
+  }]);
+
+  return Obstacle;
+}();
+
+exports.default = Obstacle;
+},{"./GameArea":"GameArea.js","./physics":"physics.js","./images/spotlight.png":"images/spotlight.png"}],"game.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -338,43 +662,62 @@ var _component = _interopRequireDefault(require("./component"));
 
 var _GameArea = require("./GameArea");
 
+var _obstacle = _interopRequireDefault(require("./obstacle"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // starts the game
-//
 function startGame() {
-  _GameArea.GameArea.start();
+  _GameArea.GameArea.menu();
 } // creation of our ballerina
 
 
-var player = new _component.default(53, 73, "red", 0, 0, 4, 8); // Causes all Changes in the Game
-// put all events in between clear and update
-
+var player = new _component.default(53, 73, "red", 100, 100, 4, [8, 18]);
 exports.player = player;
+var obstacle = new _obstacle.default(150, 100, "black", 400);
+_GameArea.GameArea.GAME_STATE = "GAME_START";
+console.log("object"); // Causes all Changes in the Game
+// put all events in between clear and update
 
 function gameLoop(delta) {
   _GameArea.GameArea.clear();
 
-  if (_GameArea.GameArea.keys && _GameArea.GameArea.keys[37]) {
+  if (_GameArea.GameArea.keys && _GameArea.GameArea.keys[37] && player.x > 0 + player.width / 2) {
     player.isWalkLeft = true;
-    player.speedX += -2;
+    player.speedX -= 0.5;
   }
 
-  if (_GameArea.GameArea.keys && _GameArea.GameArea.keys[39]) {
+  if (_GameArea.GameArea.keys && _GameArea.GameArea.keys[39] && player.x < _GameArea.GameArea.canvas.width - player.width * 1.5) {
     player.isWalkRight = true;
-    player.speedX += 2;
+    player.speedX += 0.5;
   }
 
-  if (_GameArea.GameArea.keys && _GameArea.GameArea.keys[38]) {
-    player.speedY += -2;
+  if (_GameArea.GameArea.keys && _GameArea.GameArea.keys[38] && player.isJumping == false) {
+    player.speedY -= 25;
+    player.isJumping = true;
   }
 
-  if (_GameArea.GameArea.keys && _GameArea.GameArea.keys[40]) {
-    player.speedY += 2;
+  if (_GameArea.GameArea.keys && _GameArea.GameArea.keys[32]) {
+    player.isDancing = true;
   }
 
-  player.newPos(delta);
   player.update();
+  obstacle.update();
+  player.newPos(delta);
+
+  if (obstacle.collision(player) && player.isDancing && player.danceTime == 0) {
+    obstacle.newSpot = Math.floor(Math.random() * 600);
+
+    _GameArea.GameArea.updateScore();
+  }
+
+  _GameArea.GameArea.context.fillStyle = "black";
+  _GameArea.GameArea.context.font = "20px arial";
+  _GameArea.GameArea.context.textAlign = "center";
+
+  _GameArea.GameArea.context.fillText("score:".concat(_GameArea.GameArea.score), _GameArea.GameArea.width / 2, 40);
+
+  obstacle.newPos(delta);
 }
 /* 
  this is Called by GameArea to update the game
@@ -392,10 +735,12 @@ function loop() {
   if (_GameArea.GameArea.shouldStop) {
     cancelAnimationFrame(req);
   }
+
+  _GameArea.GameArea.shouldStop = false;
 }
 
 startGame();
-},{"./component":"component.js","./GameArea":"GameArea.js"}],"main.js":[function(require,module,exports) {
+},{"./component":"component.js","./GameArea":"GameArea.js","./obstacle":"obstacle.js"}],"main.js":[function(require,module,exports) {
 "use strict";
 
 require("./main.scss");
@@ -429,7 +774,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65291" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53711" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

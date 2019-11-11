@@ -1,4 +1,38 @@
+body {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: pink;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  box-sizing: border-box;
+}
+body *,
+body *:after,
+body *:before {
+  box-sizing: inherit;
+  position: relative;
+}
+
 canvas {
+  width: 100%;
+}
+
+.game {
+  background: url(/Stage.bee5bc65.jpg);
+  background-size: cover;
+  background-position: 50% 100%;
+  background-repeat: no-repeat;
+  max-width: 800px;
+  margin: 0 auto;
   width: 100%;
 }
 
